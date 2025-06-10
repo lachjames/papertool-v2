@@ -116,12 +116,15 @@ function AppContent() {
         }
     };
 
-    const handleCreatePaper = async (paperData: NewPaperData, file: File | null) => {
+    // Find this function in your App.tsx
+    const handleCreatePaper = async (paperData: NewPaperData, contentFile: File, coverPageFile?: File | null) => {
         try {
-            await createPaper(paperData, file || undefined);
+            // Make sure you're passing all three parameters to createPaper
+            await createPaper(paperData, contentFile, coverPageFile);
             setPaperModalOpen(false);
         } catch (error) {
-            // Error is already handled in the hook
+            // Error handling
+            console.error('Error creating paper:', error);
         }
     };
 
@@ -276,6 +279,7 @@ function AppContent() {
                         onClose={() => setPaperModalOpen(false)}
                         onSubmit={handleCreatePaper}
                         isLoading={papersLoading}
+                        seriesSettings={series.find(s => s.seriesId === selectedSeries)}
                     />
                 </TabPanel>
             </Box>

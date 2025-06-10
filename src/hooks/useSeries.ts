@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { SeriesMetadata, NewSeriesData } from '../types';
 import { fetchAllSeries, createNewSeries, deleteSingleSeries } from '../services/seriesService';
 import { useApiContext } from '../context/ApiContext';
-// import { useAuth } from '../context/AuthContext';
 import { useAuth } from '../auth/AuthContext';
 
 export const useSeries = () => {
@@ -28,14 +27,14 @@ export const useSeries = () => {
         }
     }, [apiConfig.key, isAuthenticated]);
 
-    const createSeries = useCallback(async (seriesData: NewSeriesData) => {
+    const createSeries = useCallback(async (seriesData: NewSeriesData, basePdfFile?: File) => {
         // Only proceed if either API key is provided or user is authenticated
         if (!apiConfig.key && !isAuthenticated) return;
         
         try {
             setLoading(true);
             setError(null);
-            await createNewSeries(apiConfig.key, seriesData);
+            await createNewSeries(apiConfig.key, seriesData, basePdfFile);
             await fetchSeries();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create series');

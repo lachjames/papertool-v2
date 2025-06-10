@@ -14,15 +14,26 @@ import { NewPaperData } from '../../types';
 interface CreatePaperModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (paperData: NewPaperData, file: File | null) => Promise<void>;
+  // Update the onSubmit signature to accept all three parameters
+  onSubmit: (paperData: NewPaperData, contentFile: File, coverPageFile?: File | null) => Promise<void>;
   isLoading: boolean;
+  seriesSettings?: {
+    name: string;
+    institution: string;
+    coverPageSettings?: {
+      defaultTemplate?: string;
+      htmlTemplate?: string;
+      headerText?: string;
+    };
+  };
 }
 
 const CreatePaperModal: React.FC<CreatePaperModalProps> = ({ 
   open, 
   onClose, 
   onSubmit, 
-  isLoading 
+  isLoading,
+  seriesSettings
 }) => {
   return (
     <Dialog 
@@ -50,12 +61,14 @@ const CreatePaperModal: React.FC<CreatePaperModalProps> = ({
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">
             Fill in the paper details manually or upload a PDF and click the magic wand icon to auto-extract metadata.
+            You can also preview how the cover page will look before it's automatically attached to your PDF.
           </Typography>
         </Box>
         <PaperForm 
           onSubmit={onSubmit} 
           isLoading={isLoading}
           inModal={true}
+          seriesSettings={seriesSettings}
         />
       </DialogContent>
     </Dialog>

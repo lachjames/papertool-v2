@@ -1,7 +1,7 @@
 import { apiGet, apiDelete } from './api';
 import { PaperMetadata, NewPaperData } from '../types';
 import axios from 'axios';
-import getBaseURL from '../getBaseURL'; // Adjust path if needed
+import getBaseURL from '../getBaseURL'; 
 
 export const fetchPapersForSeries = async (
   apiKey: string,
@@ -52,7 +52,8 @@ export const createNewPaper = async (
   apiKey: string,
   seriesId: string,
   paperData: NewPaperData,
-  file?: File
+  contentFile: File,
+  coverPageFile?: File | null
 ): Promise<string> => {
   // Generate a unique paper ID with prefix to make it easier to identify
   const paperId = `paper_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -65,20 +66,26 @@ export const createNewPaper = async (
     authors: paperData.authors.split(',').map(a => a.trim()).filter(a => a.length > 0),
     abstract: paperData.abstract ? paperData.abstract.trim() : '',
     keywords: paperData.keywords ? paperData.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0) : [],
-    jel: paperData.jel ? paperData.jel.split(',').map(j => j.trim()).filter(j => j.length > 0) : [], // Handle JEL codes
+    jel: paperData.jel ? paperData.jel.split(',').map(j => j.trim()).filter(j => j.length > 0) : [],
+    pageSize: paperData.pageSize || { width: 595, height: 842, format: 'A4' }
   };
 
-  // Ensure we're getting valid JSON in the metadata field
+  // Add metadata and content PDF to FormData
   console.log('Sending paper metadata:', JSON.stringify(paperMetadata));
   formData.append('metadata', JSON.stringify(paperMetadata));
-
-  if (file) {
-    formData.append('pdf', file);
+  formData.append('pdf', contentFile);
+  
+  // Add cover page if available
+  if (coverPageFile) {
+    console.log('Including cover page PDF in upload');
+    formData.append('coverPage', coverPageFile);
+  } else {
+    console.log('No cover page PDF included in upload');
   }
 
   // For file uploads, we need to use axios directly with FormData
   try {
-    await axios.post(
+    const response = await axios.post(
       getBaseURL(`series/${seriesId}/papers/${paperId}`),
       formData,
       {
@@ -90,6 +97,7 @@ export const createNewPaper = async (
       }
     );
     
+    console.log('Paper creation response:', response.data);
     return paperId;
   } catch (error) {
     console.error('Error creating paper:', error);

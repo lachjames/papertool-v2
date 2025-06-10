@@ -12,7 +12,7 @@ import { NewSeriesData } from '../../types';
 interface CreateSeriesModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (seriesData: NewSeriesData) => Promise<void>;
+  onSubmit: (seriesData: NewSeriesData, basePdfFile?: File) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -26,7 +26,7 @@ const CreateSeriesModal: React.FC<CreateSeriesModalProps> = ({
     <Dialog 
       open={open} 
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
     >
       <DialogTitle sx={{ pb: 2 }}>

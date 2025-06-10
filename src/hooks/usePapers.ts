@@ -7,7 +7,6 @@ import {
     deleteSinglePaper
 } from '../services/paperService';
 import { useApiContext } from '../context/ApiContext';
-// import { useAuth } from '../context/AuthContext';
 import { useAuth } from '../auth/AuthContext';
 
 const RETRIES = 1;
@@ -83,7 +82,12 @@ export const usePapers = (seriesId: string | null) => {
         }
     }, [apiConfig.key, isAuthenticated, seriesId]);
 
-    const createPaper = useCallback(async (paperData: NewPaperData, file?: File) => {
+    // Updated to handle both content and cover page files
+    const createPaper = useCallback(async (
+        paperData: NewPaperData, 
+        contentFile: File,
+        coverPageFile?: File | null
+    ) => {
         // Only proceed if we have auth and series ID
         if ((!apiConfig.key && !isAuthenticated) || !seriesId) return;
         
@@ -91,8 +95,19 @@ export const usePapers = (seriesId: string | null) => {
             setLoading(true);
             setError(null);
 
-            // Create the paper
-            const newPaperId = await createNewPaper(apiConfig.key, seriesId, paperData, file);
+            console.log('Creating paper with content file and cover page file:', {
+                hasContentFile: !!contentFile,
+                hasCoverPage: !!coverPageFile
+            });
+
+            // Create the paper with both files
+            const newPaperId = await createNewPaper(
+                apiConfig.key, 
+                seriesId, 
+                paperData, 
+                contentFile,
+                coverPageFile
+            );
 
             // Add a delay before fetching papers to give the server time to process
             setTimeout(() => fetchPapers(), 1500);

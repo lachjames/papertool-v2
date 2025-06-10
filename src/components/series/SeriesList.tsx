@@ -111,7 +111,7 @@ const SeriesList: React.FC<SeriesListProps> = ({
                       startIcon={<VisibilityIcon />}
                       onClick={() => onSelectSeries(item.seriesId)}
                     >
-                      View
+                      Select
                     </Button>
                     
                     <Button
