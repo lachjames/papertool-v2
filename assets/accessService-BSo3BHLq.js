@@ -1,0 +1,1 @@
+import{a,b as t}from"./index-C7K9r_Tv.js";async function n(){return(await a("access/me")).data}async function i(s){return(await a(`series/${s}/access`)).data}async function o(s,e){return(await t(`series/${s}/access`,e)).data}export{n as getMyAccess,i as getSeriesAccess,o as updateSeriesAccess};
