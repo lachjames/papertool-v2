@@ -1,0 +1,1 @@
+import{a as c,b as t}from"./index-dDjowook.js";async function n(){return(await c("access/me")).data}async function o(s,e){return(await c(`archives/${s}/series/${e}/access`)).data}async function u(s,e,a){return(await t(`archives/${s}/series/${e}/access`,a)).data}export{n as getMyAccess,o as getSeriesAccess,u as updateSeriesAccess};
