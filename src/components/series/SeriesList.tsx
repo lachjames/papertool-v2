@@ -9,29 +9,39 @@ import {
   Paper,
   Grid,
   Chip,
-  Avatar
+  Avatar,
+  Tooltip
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit'; // NEW: Edit icon
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SchoolIcon from '@mui/icons-material/School';
 import { SeriesMetadata } from '../../types';
 import ScrollableContent from '../common/ScrollableContent';
+import { useAdminPanel } from '../../context/AdminPanelContext';
 
 interface SeriesListProps {
   series: SeriesMetadata[];
   onSelectSeries: (seriesId: string) => void;
   onDeleteSeries: (seriesId: string) => void;
+  onEditSeries: (seriesId: string, metadata: SeriesMetadata) => void; // NEW: Edit callback
   selectedSeries: string | null;
   isLoading: boolean;
+  isAdmin?: boolean;
+  ownerOf?: string[];
 }
 
 const SeriesList: React.FC<SeriesListProps> = ({ 
   series, 
   onSelectSeries, 
-  onDeleteSeries, 
+  onDeleteSeries,
+  onEditSeries, // NEW: Edit callback
   selectedSeries,
-  isLoading
+  isLoading,
+  isAdmin = false,
+  ownerOf = []
 }) => {
+  const { close: closeAdminOverlay } = useAdminPanel();
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" p={2}>
@@ -93,6 +103,12 @@ const SeriesList: React.FC<SeriesListProps> = ({
                     {item.institution}
                   </Typography>
                   
+                  {item.description && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }} noWrap>
+                      {item.description}
+                    </Typography>
+                  )}
+                  
                   <Chip 
                     label={`${item.paperCount} papers`} 
                     size="small" 
@@ -103,26 +119,59 @@ const SeriesList: React.FC<SeriesListProps> = ({
                     ID: {item.seriesId}
                   </Typography>
                   
-                  <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'space-between', pt: 1 }}>
+                  <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1 }}>
                     <Button
                       size="small"
                       color="primary"
                       variant="contained"
                       startIcon={<VisibilityIcon />}
-                      onClick={() => onSelectSeries(item.seriesId)}
+                      onClick={() => {
+                        closeAdminOverlay();
+                        onSelectSeries(item.seriesId);
+                      }}
+                      fullWidth
                     >
                       Select
                     </Button>
                     
-                    <Button
-                      size="small"
-                      color="error"
-                      variant="outlined"
-                      startIcon={<DeleteIcon />}
-                      onClick={() => onDeleteSeries(item.seriesId)}
-                    >
-                      Delete
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      {(() => {
+                        const canEditSeries = isAdmin || ownerOf.includes(item.seriesId);
+                        const editBtn = (
+                          <span style={{ flex: 1 }}>
+                            <Button
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              startIcon={<EditIcon />}
+                              onClick={() => onEditSeries(item.seriesId, item)}
+                              sx={{ flex: 1 }}
+                              disabled={!canEditSeries}
+                            >
+                              Edit
+                            </Button>
+                          </span>
+                        );
+                        return canEditSeries ? (
+                          editBtn
+                        ) : (
+                          <Tooltip title="Only admins and series owners can edit series settings.">{editBtn}</Tooltip>
+                        );
+                      })()}
+                      
+                      {isAdmin && (
+                        <Button
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => onDeleteSeries(item.seriesId)}
+                          sx={{ flex: 1 }}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </Box>
                   </Box>
                 </Paper>
               </Grid>

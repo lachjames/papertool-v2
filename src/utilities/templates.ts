@@ -1,4 +1,4 @@
-// src/utilities/templates.ts
+// PDF-optimized templates with simplified CSS
 
 export const academicTemplate = `
 <!DOCTYPE html>
@@ -10,125 +10,157 @@ export const academicTemplate = `
       padding: 0;
       font-family: 'Times New Roman', Times, serif;
       line-height: 1.5;
-      background-color: #ffffff;
-      color: #000000;
+      background: white;
+      color: black;
     }
     .cover-page {
       padding: 50pt;
-      box-sizing: border-box;
-      min-height: 100vh;
+      background: white;
+      color: black;
       position: relative;
-      background-color: #ffffff;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20pt;
+    }
+    .logo img {
+      max-height: 80pt;
+      max-width: 200pt;
     }
     .header-text {
       font-size: 14pt;
       font-style: italic;
-      color: rgb(76, 76, 76);
+      color: #4c4c4c;
       margin-bottom: 15pt;
+      text-align: center;
     }
     .divider {
       height: 1px;
-      background-color: rgb(178, 178, 178);
+      background-color: #b2b2b2;
       margin-bottom: 35pt;
     }
     .title {
       font-size: 24pt;
       font-weight: bold;
       margin-bottom: 30pt;
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .authors {
       font-size: 12pt;
       margin-bottom: 20pt;
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .institution {
       font-size: 12pt;
       margin-bottom: 20pt;
-      display: {{ institutionDisplay }};
-      color: #000000;
-    }
-    .affiliation {
-      font-size: 12pt;
-      margin-bottom: 20pt;
-      display: {{ affiliationDisplay }};
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .series-name {
       font-size: 12pt;
       margin-bottom: 20pt;
-      display: {{ seriesNameDisplay }};
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .date {
       font-size: 12pt;
       margin-bottom: 30pt;
-      display: {{ dateDisplay }};
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .abstract-section {
-      display: {{ abstractDisplay }};
       margin-bottom: 25pt;
     }
     .abstract-header {
       font-size: 14pt;
       font-weight: bold;
       margin-bottom: 10pt;
-      color: #000000;
+      color: black;
     }
     .abstract {
       font-size: 11pt;
       text-align: justify;
-      color: #000000;
+      color: black;
     }
     .jel {
       font-size: 11pt;
       margin-bottom: 15pt;
-      display: {{ jelDisplay }};
-      color: #000000;
+      color: black;
     }
     .keywords {
       font-size: 11pt;
       margin-bottom: 15pt;
-      display: {{ keywordsDisplay }};
-      color: #000000;
+      color: black;
+    }
+    .footer-image {
+      text-align: center;
+      margin-top: 40pt;
+    }
+    .footer-image img {
+      max-height: 40pt;
+      max-width: 100%;
     }
     .page-number {
       font-size: 10pt;
       text-align: center;
-      position: absolute;
-      bottom: 30pt;
-      left: 0;
-      right: 0;
-      color: #000000;
+      margin-top: 20pt;
+      color: black;
     }
   </style>
 </head>
 <body>
   <div class="cover-page">
-    <div class="header-text">{{ headerText }}</div>
+    {{#if logoUrl}}
+    <div class="logo">
+      <img src="{{logoUrl}}" alt="Logo" />
+    </div>
+    {{/if}}
+    
+    <div class="header-text">{{headerText}}</div>
     <div class="divider"></div>
     
-    <div class="title">{{ title }}</div>
+    <div class="title">{{title}}</div>
     
-    <div class="authors">Authors: {{ authors }}</div>
+    <div class="authors">{{authors}}</div>
     
-    <div class="institution">Institution: {{ institution }}</div>
+    {{#if includeInstitution}}
+    <div class="institution">{{institution}}</div>
+    {{/if}}
     
-    <div class="series-name">Series: {{ seriesName }}</div>
+    {{#if includeSeriesName}}
+    <div class="series-name">{{seriesName}}</div>
+    {{/if}}
     
-    <div class="affiliation">Affiliation: {{ affiliation }}</div>
+    {{#if includeDate}}
+    <div class="date">{{date}}</div>
+    {{/if}}
     
-    <div class="date">Date: {{ date }}</div>
-    
+    {{#if includeAbstract}}
     <div class="abstract-section">
-      <div class="abstract-header">Abstract:</div>
-      <div class="abstract">{{ abstract }}</div>
+      <div class="abstract-header">Abstract</div>
+      <div class="abstract">{{abstract}}</div>
     </div>
+    {{/if}}
     
-    <div class="jel">JEL Classification: {{ jel }}</div>
+    {{#if includeJEL}}
+    {{#if jel}}
+    <div class="jel">JEL Classification: {{jel}}</div>
+    {{/if}}
+    {{/if}}
     
-    <div class="keywords">Keywords: {{ keywords }}</div>
+    {{#if includeKeywords}}
+    {{#if keywords}}
+    <div class="keywords">Keywords: {{keywords}}</div>
+    {{/if}}
+    {{/if}}
+    
+    {{#if footerImageUrl}}
+    <div class="footer-image">
+      <img src="{{footerImageUrl}}" alt="Footer" />
+    </div>
+    {{/if}}
     
     <div class="page-number">Page 1</div>
   </div>
@@ -146,89 +178,119 @@ export const minimalTemplate = `
       padding: 0;
       font-family: 'Times New Roman', Times, serif;
       line-height: 1.5;
-      background-color: #ffffff;
-      color: #000000;
+      background: white;
+      color: black;
     }
     .cover-page {
       padding: 50pt;
-      box-sizing: border-box;
-      min-height: 100vh;
+      background: white;
+      color: black;
       position: relative;
-      background-color: #ffffff;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 30pt;
+    }
+    .logo img {
+      max-height: 60pt;
+      max-width: 150pt;
     }
     .title {
       font-size: 26pt;
       font-weight: bold;
       margin-bottom: 50pt;
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .authors {
       font-size: 14pt;
       font-style: italic;
-      color: rgb(76, 76, 76);
+      color: #4c4c4c;
       margin-bottom: 30pt;
+      text-align: center;
     }
     .date {
       font-size: 12pt;
-      color: rgb(128, 128, 128);
+      color: #808080;
       margin-bottom: 30pt;
-      display: {{ dateDisplay }};
+      text-align: center;
     }
     .series-name {
       font-size: 12pt;
       font-style: italic;
-      color: rgb(102, 102, 102);
+      color: #666666;
       margin-bottom: 30pt;
-      display: {{ seriesNameDisplay }};
+      text-align: center;
     }
     .institution {
       font-size: 12pt;
-      color: rgb(128, 128, 128);
+      color: #808080;
       margin-bottom: 30pt;
-      display: {{ institutionDisplay }};
+      text-align: center;
     }
     .abstract {
       font-size: 11pt;
       text-align: justify;
       margin-top: 20pt;
       margin-bottom: 30pt;
-      display: {{ abstractDisplay }};
-      color: #000000;
+      color: black;
     }
     .footer {
       height: 1px;
-      background-color: rgb(178, 178, 178);
-      position: absolute;
-      bottom: 50pt;
-      left: 50pt;
-      right: 50pt;
+      background-color: #b2b2b2;
+      margin-top: 40pt;
+      margin-bottom: 20pt;
+    }
+    .footer-image {
+      text-align: center;
+      margin-bottom: 20pt;
+    }
+    .footer-image img {
+      max-height: 30pt;
+      max-width: 100%;
     }
     .page-number {
       font-size: 10pt;
       text-align: center;
-      color: rgb(128, 128, 128);
-      position: absolute;
-      bottom: 30pt;
-      left: 0;
-      right: 0;
+      color: #808080;
     }
   </style>
 </head>
 <body>
   <div class="cover-page">
-    <div class="title">{{ title }}</div>
+    {{#if logoUrl}}
+    <div class="logo">
+      <img src="{{logoUrl}}" alt="Logo" />
+    </div>
+    {{/if}}
     
-    <div class="authors">{{ authors }}</div>
+    <div class="title">{{title}}</div>
+    <div class="authors">{{authors}}</div>
     
-    <div class="date">{{ date }}</div>
+    {{#if includeDate}}
+    <div class="date">{{date}}</div>
+    {{/if}}
     
-    <div class="series-name">{{ seriesName }}</div>
+    {{#if includeSeriesName}}
+    <div class="series-name">{{seriesName}}</div>
+    {{/if}}
     
-    <div class="institution">{{ institution }}</div>
+    {{#if includeInstitution}}
+    <div class="institution">{{institution}}</div>
+    {{/if}}
     
-    <div class="abstract">{{ abstract }}</div>
+    {{#if includeAbstract}}
+    <div class="abstract">{{abstract}}</div>
+    {{/if}}
     
     <div class="footer"></div>
+    
+    {{#if footerImageUrl}}
+    <div class="footer-image">
+      <img src="{{footerImageUrl}}" alt="Footer" />
+    </div>
+    {{/if}}
+    
     <div class="page-number">Page 1</div>
   </div>
 </body>
@@ -245,144 +307,175 @@ export const formalTemplate = `
       padding: 0;
       font-family: 'Times New Roman', Times, serif;
       line-height: 1.5;
-      height: 100%;
-      background-color: #ffffff;
-      color: #000000;
+      background: white;
+      color: black;
     }
     .cover-page {
-      min-height: 100vh;
+      background: white;
+      color: black;
       position: relative;
-      background-color: #ffffff;
     }
     .header-box {
-      background-color: rgb(230, 230, 242);
-      border-bottom: 1px solid rgb(204, 204, 204);
-      height: 120pt;
-      width: 100%;
-      padding: 40pt 60pt 0;
-      box-sizing: border-box;
+      background-color: #e6e6f2;
+      border-bottom: 1px solid #cccccc;
+      padding: 40pt 60pt;
+      text-align: center;
+    }
+    .logo {
+      margin-bottom: 15pt;
+    }
+    .logo img {
+      max-height: 50pt;
+      max-width: 120pt;
     }
     .header-text {
       font-size: 16pt;
       font-weight: bold;
-      color: rgb(51, 51, 102);
+      color: #333366;
       text-align: center;
       margin-bottom: 20pt;
     }
     .meta-row {
-      display: flex;
-      justify-content: space-between;
+      text-align: center;
     }
     .series-name {
       font-size: 12pt;
       font-style: italic;
-      color: rgb(76, 76, 76);
-      display: {{ seriesNameDisplay }};
+      color: #4c4c4c;
+      display: inline-block;
+      margin-right: 40pt;
     }
     .date {
       font-size: 12pt;
-      color: rgb(76, 76, 76);
-      display: {{ dateDisplay }};
+      color: #4c4c4c;
+      display: inline-block;
     }
     .main-content {
       padding: 60pt;
-      box-sizing: border-box;
     }
     .title {
       font-size: 24pt;
       font-weight: bold;
       margin-bottom: 20pt;
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .divider {
       height: 1px;
-      background-color: rgb(178, 178, 178);
+      background-color: #b2b2b2;
       margin-bottom: 30pt;
     }
     .authors {
       font-size: 14pt;
       font-style: italic;
       margin-bottom: 30pt;
-      color: #000000;
+      color: black;
+      text-align: center;
     }
     .institution {
       font-size: 14pt;
-      color: rgb(76, 76, 76);
+      color: #4c4c4c;
       margin-bottom: 50pt;
-      display: {{ institutionDisplay }};
+      text-align: center;
     }
     .abstract-section {
-      display: {{ abstractDisplay }};
       margin-bottom: 30pt;
     }
     .abstract-header {
       font-size: 16pt;
       font-weight: bold;
       margin-bottom: 15pt;
-      color: #000000;
+      color: black;
     }
     .abstract {
       font-size: 11pt;
       text-align: justify;
-      color: #000000;
+      color: black;
     }
     .jel {
       font-size: 11pt;
       margin-bottom: 15pt;
-      display: {{ jelDisplay }};
-      color: #000000;
+      color: black;
     }
     .keywords {
       font-size: 11pt;
       margin-bottom: 15pt;
-      display: {{ keywordsDisplay }};
-      color: #000000;
+      color: black;
     }
     .footer-box {
-      background-color: rgb(230, 230, 242);
-      border-top: 1px solid rgb(204, 204, 204);
-      height: 60pt;
-      width: 100%;
-      position: absolute;
-      bottom: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background-color: #e6e6f2;
+      border-top: 1px solid #cccccc;
+      padding: 20pt;
+      text-align: center;
+      margin-top: 40pt;
+    }
+    .footer-image {
+      margin-bottom: 10pt;
+    }
+    .footer-image img {
+      max-height: 30pt;
+      max-width: 200pt;
     }
     .page-number {
       font-size: 10pt;
-      color: rgb(76, 76, 76);
+      color: #4c4c4c;
     }
   </style>
 </head>
 <body>
   <div class="cover-page">
     <div class="header-box">
-      <div class="header-text">{{ headerText }}</div>
+      {{#if logoUrl}}
+      <div class="logo">
+        <img src="{{logoUrl}}" alt="Logo" />
+      </div>
+      {{/if}}
+      <div class="header-text">{{headerText}}</div>
       <div class="meta-row">
-        <div class="series-name">{{ seriesName }}</div>
-        <div class="date">{{ date }}</div>
+        {{#if includeSeriesName}}
+        <span class="series-name">{{seriesName}}</span>
+        {{/if}}
+        {{#if includeDate}}
+        <span class="date">{{date}}</span>
+        {{/if}}
       </div>
     </div>
     
     <div class="main-content">
-      <div class="title">{{ title }}</div>
+      <div class="title">{{title}}</div>
       <div class="divider"></div>
-      <div class="authors">By: {{ authors }}</div>
+      <div class="authors">By: {{authors}}</div>
       
-      <div class="institution">{{ institution }}</div>
+      {{#if includeInstitution}}
+      <div class="institution">{{institution}}</div>
+      {{/if}}
       
+      {{#if includeAbstract}}
       <div class="abstract-section">
         <div class="abstract-header">Abstract</div>
-        <div class="abstract">{{ abstract }}</div>
+        <div class="abstract">{{abstract}}</div>
       </div>
+      {{/if}}
       
-      <div class="jel">JEL Classification: {{ jel }}</div>
+      {{#if includeJEL}}
+      {{#if jel}}
+      <div class="jel">JEL Classification: {{jel}}</div>
+      {{/if}}
+      {{/if}}
       
-      <div class="keywords">Keywords: {{ keywords }}</div>
+      {{#if includeKeywords}}
+      {{#if keywords}}
+      <div class="keywords">Keywords: {{keywords}}</div>
+      {{/if}}
+      {{/if}}
     </div>
     
     <div class="footer-box">
+      {{#if footerImageUrl}}
+      <div class="footer-image">
+        <img src="{{footerImageUrl}}" alt="Footer" />
+      </div>
+      {{/if}}
       <div class="page-number">Page 1</div>
     </div>
   </div>
@@ -405,7 +498,6 @@ export const getTemplateByType = (templateType: string): string => {
     }
 };
 
-// A simplified default template for custom editing
 export const defaultCustomTemplate = `
 <!DOCTYPE html>
 <html>
@@ -416,65 +508,89 @@ export const defaultCustomTemplate = `
       padding: 0;
       font-family: 'Times New Roman', Times, serif;
       line-height: 1.5;
-      background-color: #ffffff;
-      color: #000000;
+      background: white;
+      color: black;
     }
     .cover-page {
       padding: 50pt;
-      box-sizing: border-box;
-      min-height: 100vh;
+      background: white;
+      color: black;
       position: relative;
-      background-color: #ffffff;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20pt;
+    }
+    .logo img {
+      max-height: 60pt;
+      max-width: 150pt;
     }
     .title {
       font-size: 24pt;
       font-weight: bold;
       text-align: center;
       margin-bottom: 30pt;
-      color
-
-: #000000;
+      color: black;
     }
     .authors {
       font-size: 14pt;
       text-align: center;
       margin-bottom: 20pt;
-      color: #000000;
+      color: black;
     }
     .abstract-section {
       margin-top: 40pt;
-      display: {{ abstractDisplay }};
     }
     .abstract-header {
       font-size: 14pt;
       font-weight: bold;
       margin-bottom: 10pt;
-      color: #000000;
+      color: black;
     }
     .abstract {
       font-size: 12pt;
       text-align: justify;
-      color: #000000;
+      color: black;
+    }
+    .footer-image {
+      text-align: center;
+      margin-top: 40pt;
+      margin-bottom: 20pt;
+    }
+    .footer-image img {
+      max-height: 30pt;
+      max-width: 100%;
     }
     .footer {
-      position: absolute;
-      bottom: 30pt;
-      left: 0;
-      width: 100%;
       text-align: center;
-      color: #000000;
+      color: black;
+      margin-top: 20pt;
     }
   </style>
 </head>
 <body>
   <div class="cover-page">
-    <div class="title">{{ title }}</div>
-    <div class="authors">{{ authors }}</div>
+    {{#if logoUrl}}
+    <div class="logo">
+      <img src="{{logoUrl}}" alt="Logo" />
+    </div>
+    {{/if}}
     
+    <div class="title">{{title}}</div>
+    <div class="authors">{{authors}}</div>
+    
+    {{#if includeAbstract}}
     <div class="abstract-section">
       <div class="abstract-header">Abstract</div>
-      <div class="abstract">{{ abstract }}</div>
+      <div class="abstract">{{abstract}}</div>
     </div>
+    {{/if}}
+    
+    {{#if footerImageUrl}}
+    <div class="footer-image">
+      <img src="{{footerImageUrl}}" alt="Footer" />
+    </div>
+    {{/if}}
     
     <div class="footer">Page 1</div>
   </div>

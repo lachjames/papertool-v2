@@ -1,46 +1,69 @@
-import { PageSize as AppPageSize } from '../types';
-import { PageSize as ReactPdfPageSize } from '@react-pdf/types';
+// import { PageSize, resolvePageSize } from '../shared-pdf-types';
+// import { PageSize as ReactPdfPageSize } from '@react-pdf/types';
 
-/**
- * Converts application PageSize to React-PDF's PageSize type
- * 
- * @param pageSize The PageSize object from the application
- * @returns A valid React-PDF PageSize value
- */
-export function toReactPdfPageSize(pageSize: AppPageSize): ReactPdfPageSize {
-    // Handle predefined formats directly
-    if (pageSize.format) {
-        const format = pageSize.format.toUpperCase();
+// /**
+//  * Converts shared PageSize to React-PDF's PageSize type
+//  * 
+//  * @param pageSize The shared PageSize object
+//  * @returns A valid React-PDF PageSize value
+//  */
+// export function toReactPdfPageSize(pageSize: PageSize): ReactPdfPageSize {
+//     // Handle standard formats
+//     if (typeof pageSize === 'string') {
+//         switch (pageSize) {
+//             case 'a4': return 'A4';
+//             case 'letter': return 'LETTER';
+//             case 'small': 
+//                 // React-PDF doesn't have 'small', so use dimensions
+//                 return [432, 288]; // 6in x 4in in points
+//             default: return 'A4';
+//         }
+//     }
 
-        // Match to React-PDF's expected format strings
-        switch (format) {
-            case 'A4': return 'A4';
-            case 'A3': return 'A3';
-            case 'A5': return 'A5';
-            case 'LETTER': return 'LETTER';
-            case 'LEGAL': return 'LEGAL';
-            case 'TABLOID': return 'TABLOID';
-            case 'EXECUTIVE': return 'EXECUTIVE';
-            case 'B5': return 'B5';
-            // For unknown formats, we'll fall through to using dimensions
-        }
-    }
+//     // Handle custom sizes - convert from inches to points
+//     const resolved = resolvePageSize(pageSize);
+//     if (!resolved) {
+//         return 'A4'; // Fallback
+//     }
 
-    // For custom sizes or unknown formats, use dimensions array
-    // Must cast to ReactPdfPageSize to satisfy TypeScript
-    return [pageSize.width, pageSize.height] as ReactPdfPageSize;
-}
+//     const widthPoints = parseFloat(resolved.width) * 72;
+//     const heightPoints = parseFloat(resolved.height) * 72;
+    
+//     return [widthPoints, heightPoints] as ReactPdfPageSize;
+// }
 
-/**
- * Determines if the page is in portrait orientation
- */
-export function isPortrait(pageSize: AppPageSize): boolean {
-    return pageSize.height > pageSize.width;
-}
+// /**
+//  * Determines if the page is in portrait orientation
+//  */
+// export function isPortrait(pageSize: PageSize): boolean {
+//     const resolved = resolvePageSize(pageSize);
+//     if (!resolved) return true;
+    
+//     const widthNum = parseFloat(resolved.width);
+//     const heightNum = parseFloat(resolved.height);
+//     return heightNum > widthNum;
+// }
 
-/**
- * Gets orientation string for React-PDF
- */
-export function getOrientation(pageSize: AppPageSize): 'portrait' | 'landscape' {
-    return isPortrait(pageSize) ? 'portrait' : 'landscape';
-}
+// /**
+//  * Gets orientation string for React-PDF
+//  */
+// export function getOrientation(pageSize: PageSize): 'portrait' | 'landscape' {
+//     return isPortrait(pageSize) ? 'portrait' : 'landscape';
+// }
+
+// /**
+//  * Convert shared PageSize to points for legacy functions
+//  */
+// export function pageToPoints(pageSize: PageSize): { width: number; height: number } {
+//     const resolved = resolvePageSize(pageSize);
+//     if (!resolved) {
+//         // Fallback to A4
+//         return { width: 595, height: 842 };
+//     }
+    
+//     // Convert from inches to points (72 points = 1 inch)
+//     const widthPoints = parseFloat(resolved.width) * 72;
+//     const heightPoints = parseFloat(resolved.height) * 72;
+    
+//     return { width: widthPoints, height: heightPoints };
+// }

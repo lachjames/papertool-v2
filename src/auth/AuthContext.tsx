@@ -35,7 +35,7 @@ export function getRedirectURI() {
     let redirectUri = "";
     switch (window.location.hostname) {
         case "localhost":
-            redirectUri = "http%3A%2F%2Flocalhost:5173%2F";
+            redirectUri = "http%3A%2F%2Flocalhost:5177%2F";
             break;
         case "dev.papertool.sodalabs.io":
             redirectUri = "https%3A%2F%2Fdev.papertool.sodalabs.io%2F";

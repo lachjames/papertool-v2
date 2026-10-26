@@ -5,9 +5,8 @@ export default defineConfig(({ command, mode, isPreview }) => {
   const isDev = mode === 'development'
   const isLocalDev = command === 'serve' && !isPreview
 
-  // Your existing config...
   const apiBaseUrl = isLocalDev
-    ? 'http://localhost:3060'
+    ? 'http://localhost:3067'
     : 'https://papertool-server.sodalabs.io'
 
   const deploymentBaseUrl = isDev
@@ -16,6 +15,18 @@ export default defineConfig(({ command, mode, isPreview }) => {
 
   return {
     base: isLocalDev ? '/' : deploymentBaseUrl,
+
+    server: {
+      host: 'localhost',
+      port: 5177,
+      strictPort: true,
+    },
+
+    preview: {
+      host: 'localhost',
+      port: 5177,
+      strictPort: true,
+    },
 
     define: {
       "process.env": {},

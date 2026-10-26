@@ -37,13 +37,13 @@ const Login: React.FC = () => {
       }}
     >
       <Typography variant="h5" align="center" gutterBottom>
-        Welcome to RePEc Paper Management
+        Welcome to Paper Tool 2
       </Typography>
       
       <Divider sx={{ width: '100%', mb: 2 }} />
       
       <Typography variant="subtitle1" align="center" gutterBottom>
-        Sign in to access the application
+        Sign in to access Paper Tool 2
       </Typography>
       
       {authError && (

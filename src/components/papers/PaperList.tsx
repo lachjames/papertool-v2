@@ -1,80 +1,129 @@
 import React from 'react';
-import { 
-  Typography, 
-  Card, 
-  CardContent,
-  Box,
-  CircularProgress,
-  Paper
+import {
+    Typography,
+    Box,
+    CircularProgress,
+    Paper,
+    Button
 } from '@mui/material';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { PaperMetadata } from '../../types';
 import PaperItem from './PaperItem';
-import ScrollableContent from '../common/ScrollableContent';
 
 interface PaperListProps {
-  paperIds: string[];
-  paperMetadata: Record<string, PaperMetadata>;
-  onDeletePaper: (paperId: string) => void;
-  isLoading: boolean;
-  seriesId: string | null;
+    paperIds: string[];
+    paperMetadata: Record<string, PaperMetadata>;
+    onDeletePaper: (paperId: string) => void;
+    onEditPaper: (paperId: string, metadata: PaperMetadata) => void;
+    isLoading: boolean;
+    isLoadingMore: boolean;
+    hasMore: boolean;
+    totalPaperCount: number;
+    onLoadMorePapers: () => Promise<void> | void;
+    seriesId: string | null;
 }
 
-const PaperList: React.FC<PaperListProps> = ({ 
-  paperIds, 
-  paperMetadata, 
-  onDeletePaper, 
-  isLoading,
-  seriesId
+const PaperList: React.FC<PaperListProps> = ({
+    paperIds,
+    paperMetadata,
+    onDeletePaper,
+    onEditPaper,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    totalPaperCount,
+    onLoadMorePapers,
+    seriesId
 }) => {
-  if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" p={2}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+    if (isLoading && paperIds.length === 0) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" p={8}>
+                <CircularProgress />
+            </Box>
+        );
+    }
 
-  if (!seriesId) {
-    return (
-      <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
-          Select a series to view papers.
-        </Typography>
-      </Paper>
-    );
-  }
+    if (!seriesId) {
+        return null;
+    }
 
-  if (paperIds.length === 0) {
-    return (
-      <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
-          No papers found in this series. Add your first paper to get started.
-        </Typography>
-      </Paper>
-    );
-  }
+    if (paperIds.length === 0) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    p: 8,
+                    textAlign: 'center'
+                }}
+            >
+                <Box
+                    sx={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        bgcolor: 'grey.100',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 3
+                    }}
+                >
+                    <DescriptionIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+                </Box>
+                <Typography variant="h6" gutterBottom color="text.primary" fontWeight={600}>
+                    No Papers Yet
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    This series doesn't have any papers yet. Click "Add Paper" above to create your first paper, or use the Import/Migrate tab to import papers from RePEc.
+                </Typography>
+            </Box>
+        );
+    }
 
-  return (
-    <Card variant="outlined">
-      <CardContent sx={{ pb: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          Papers in Series
-        </Typography>
-        
-        <ScrollableContent maxHeight="calc(100vh - 350px)">
-          {paperIds.map((paperId) => (
-            <PaperItem
-              key={paperId}
-              paperId={paperId}
-              metadata={paperMetadata[paperId]}
-              onDelete={onDeletePaper}
-              seriesId={seriesId}
-            />
-          ))}
-        </ScrollableContent>
-      </CardContent>
-    </Card>
-  );
+    const loadedCount = paperIds.length;
+    const totalCount = totalPaperCount || loadedCount;
+    const showingSubset = totalCount > loadedCount;
+
+    return (
+        <Box>
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                    {showingSubset
+                        ? `Showing ${loadedCount} most recent of ${totalCount} papers in this series`
+                        : `${totalCount} ${totalCount === 1 ? 'paper' : 'papers'} in this series`}
+                </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {paperIds.map((paperId) => (
+                    <PaperItem
+                        key={paperId}
+                        paperId={paperId}
+                        metadata={paperMetadata[paperId]}
+                        onDelete={onDeletePaper}
+                        onEdit={onEditPaper}
+                        seriesId={seriesId}
+                    />
+                ))}
+            </Box>
+
+            {hasMore && (
+                <Box sx={{ mt: 2.5, display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                        variant="outlined"
+                        onClick={onLoadMorePapers}
+                        disabled={isLoadingMore}
+                    >
+                        {isLoadingMore ? <CircularProgress size={18} sx={{ mr: 1 }} /> : null}
+                        {isLoadingMore ? 'Loading older papers...' : 'Load Older Papers'}
+                    </Button>
+                </Box>
+            )}
+        </Box>
+    );
 };
 
 export default PaperList;
