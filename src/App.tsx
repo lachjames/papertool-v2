@@ -17,6 +17,7 @@ import { useAccess } from './hooks/useAccess';
 import { AdminPanelProvider } from './context/AdminPanelContext';
 import ArchiveAdminPanel from './components/admin/ArchiveAdminPanel';
 import CreateArchivePanel from './components/admin/CreateArchivePanel';
+import ProtectedRoute from './auth/ProtectedRoute';
 
 // Create a cleaner, flatter theme
 const theme = createTheme({
@@ -343,7 +344,9 @@ function App() {
                 <ApiProvider>
                     <ArchiveProvider>
                         <AdminPanelProvider>
-                            <AppContent />
+                            <ProtectedRoute>
+                                <AppContent />
+                            </ProtectedRoute>
                         </AdminPanelProvider>
                     </ArchiveProvider>
                 </ApiProvider>

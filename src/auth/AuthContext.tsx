@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import axios from 'axios';
 import getBaseURL from '../getBaseURL';
+import {
+    installSessionRefresh,
+    scheduleRefresh,
+    cancelScheduledRefresh,
+    SESSION_EXPIRED_EVENT
+} from '../services/sessionRefresh';
 
 // Types
 interface User {
@@ -8,6 +14,8 @@ interface User {
     email: string;
     name?: string;
     groups?: string[];
+    /** Seconds until the current id token expires (reported by GET /user). */
+    sessionExpiresIn?: number;
 }
 
 interface AuthContextProps {
@@ -31,21 +39,20 @@ interface AuthProviderProps {
 // Configure axios to include credentials by default
 axios.defaults.withCredentials = true;
 
+// Refresh the Cognito cookies on 401 (once, then retry) and ahead of their expiry.
+installSessionRefresh();
+
+const KNOWN_REDIRECT_URIS: Record<string, string> = {
+    'localhost': 'http://localhost:5177/',
+    'dev.papertool.sodalabs.io': 'https://dev.papertool.sodalabs.io/',
+    'papertool.sodalabs.io': 'https://papertool.sodalabs.io/'
+};
+
 export function getRedirectURI() {
-    let redirectUri = "";
-    switch (window.location.hostname) {
-        case "localhost":
-            redirectUri = "http%3A%2F%2Flocalhost:5177%2F";
-            break;
-        case "dev.papertool.sodalabs.io":
-            redirectUri = "https%3A%2F%2Fdev.papertool.sodalabs.io%2F";
-            break;
-        case "papertool.sodalabs.io":
-            redirectUri = "https%3A%2F%2Fpapertool.sodalabs.io%2F";
-            break;
-        default:
-            throw new Error("Unknown hostname: " + window.location.hostname);
-    }
+    // Cognito validates the redirect URI against the app client's callback list, so an
+    // unknown host simply fails at Cognito with a clear message instead of throwing here.
+    const { hostname, origin } = window.location;
+    const redirectUri = encodeURIComponent(KNOWN_REDIRECT_URIS[hostname] || `${origin}/`);
     console.log("Using redirect URI: ", redirectUri);
     return redirectUri;
 }
@@ -55,6 +62,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
     const [authError, setAuthError] = useState<string | null>(null);
+
+    // Lets the session-expired handler tell "a signed-in session ended" apart from
+    // "a visitor with no cookies got the usual 401".
+    const wasAuthenticated = useRef(false);
+    useEffect(() => {
+        wasAuthenticated.current = isAuthenticated;
+    }, [isAuthenticated]);
 
     const clearAuthError = () => setAuthError(null);
 
@@ -74,6 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Logout function
     const logout = async () => {
+        cancelScheduledRefresh();
         try {
             await axios.post(getBaseURL('auth/logout'), {}, { withCredentials: true });
         } catch (error) {
@@ -87,12 +102,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Function to fetch user info
     const fetchUserInfo = async () => {
         try {
-            const userResponse = await axios.get(getBaseURL('user'), {
+            const userResponse = await axios.get<User>(getBaseURL('user'), {
                 withCredentials: true
             });
-            console.log("User data received:", userResponse.data);
-            setUser(userResponse.data);
+            const data = userResponse.data;
+            setUser(data);
             setIsAuthenticated(true);
+            if (typeof data.sessionExpiresIn === 'number') {
+                scheduleRefresh(data.sessionExpiresIn);
+            }
             return true;
         } catch (error) {
             console.error('Error fetching user info:', error);
@@ -101,6 +119,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             return false;
         }
     };
+
+    // Drop to the signed-out state when a refresh fails (refresh token revoked/expired).
+    useEffect(() => {
+        const onSessionExpired = () => {
+            if (wasAuthenticated.current) {
+                setAuthError('Your session has expired. Please sign in again.');
+            }
+            setIsAuthenticated(false);
+            setUser(null);
+        };
+        window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+        return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    }, []);
 
     // Check auth status on load and handle code in URL
     useEffect(() => {
@@ -117,11 +148,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     try {
                         // Exchange code for token
                         console.log("Exchanging code for token...");
-                        await axios.post(
-                            getBaseURL('auth/token'), 
+                        const tokenResponse = await axios.post(
+                            getBaseURL('auth/token'),
                             { code, dev: window.location.hostname === 'localhost' },
                             { withCredentials: true }
                         );
+                        scheduleRefresh(Number(tokenResponse.data?.expiresIn) || 3600);
 
                         // Get user info after token exchange
                         await fetchUserInfo();
@@ -132,7 +164,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                         setUser(null);
                     }
                 } else {
-                    // No code in URL, check if we're already authenticated
+                    // No code in URL, check if we're already authenticated. An expired id token
+                    // is handled by the 401 interceptor (refresh, then retry) before this fails.
                     await fetchUserInfo();
                 }
             } catch (error) {
