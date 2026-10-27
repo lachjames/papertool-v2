@@ -53,6 +53,21 @@ export interface SeriesMetadata {
   coverPageSettings?: CoverPageSettings;
 }
 
+export type DeclarationStatus = 'yes' | 'no' | 'not_provided';
+
+/** One research-integrity declaration (funding, conflicts of interest, ethics approval). */
+export interface PaperDeclaration {
+  status: DeclarationStatus;
+  /** Free-text details, used when status is 'yes'. */
+  details?: string;
+}
+
+export interface PaperDeclarations {
+  funding: PaperDeclaration;
+  conflictsOfInterest: PaperDeclaration;
+  ethicsApproval: PaperDeclaration;
+}
+
 export interface PaperMetadata {
   title: string;
   authors: string[];
@@ -69,6 +84,9 @@ export interface PaperMetadata {
 
   /** Canonical landing page URL for this specific paper (optional override). */
   link?: string;
+
+  /** Research-integrity declarations. Absent on historic papers (shown as "Not provided"). */
+  declarations?: PaperDeclarations;
 
   createdAt: string;
   updatedAt: string;
@@ -125,6 +143,9 @@ export interface NewPaperData {
 
   /** Canonical landing page URL for this specific paper (optional override). */
   link?: string;
+
+  /** Research-integrity declarations (required when creating a paper). */
+  declarations?: PaperDeclarations;
 
   pageSize?: PageSize; // Now uses shared PageSize type
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Alert } from '@mui/material';
+import { Box } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ApiProvider } from './context/ApiContext';
@@ -11,7 +11,7 @@ import SeriesWorkspace from './components/series/SeriesWorkspace';
 import ConfirmDialog from './components/common/ConfirmDialog';
 import { useSeries } from './hooks/useSeries';
 import { usePapers } from './hooks/usePapers';
-import { NewSeriesData, NewPaperData, PaperMetadata, SeriesMetadata } from './types';
+import { NewSeriesData, NewPaperData } from './types';
 import { AuthProvider } from './auth/AuthContext';
 import { useAccess } from './hooks/useAccess';
 import { AdminPanelProvider } from './context/AdminPanelContext';
@@ -135,11 +135,6 @@ const theme = createTheme({
 function AppContent() {
     const [selectedSeries, setSelectedSeries] = useState<string | null>(null);
     const [globalError, setGlobalError] = useState<string | null>(null);
-
-    // Series editing state
-    const [seriesEditMode, setSeriesEditMode] = useState(false);
-    const [editingSeriesId, setEditingSeriesId] = useState<string | null>(null);
-    const [editingSeriesMetadata, setEditingSeriesMetadata] = useState<SeriesMetadata | null>(null);
 
     // Confirmation dialog states
     const [seriesDeleteConfirm, setSeriesDeleteConfirm] = useState<{ open: boolean, seriesId: string | null }>({

@@ -3,7 +3,6 @@ import {
     Typography,
     Box,
     CircularProgress,
-    Paper,
     Button
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';

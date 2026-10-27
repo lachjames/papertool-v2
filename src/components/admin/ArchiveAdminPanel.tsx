@@ -30,7 +30,6 @@ import {
   deleteArchiveAdmin,
   getArchiveMeta,
   getArchiveRedif,
-  initArchiveAdmin,
   publishArchiveAdmin,
   putArchiveMeta,
   putArchiveRedif,

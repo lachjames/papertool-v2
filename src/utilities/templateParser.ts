@@ -7,7 +7,7 @@
 export function parseTemplate(template: string, data: Record<string, any>): string {
   if (!template) return '';
 
-  return template.replace(/\{\{\s*([^}]+)\s*\}\}/g, (match, varName) => {
+  return template.replace(/\{\{\s*([^}]+)\s*\}\}/g, (_match, varName) => {
     const trimmedVarName = varName.trim();
     const value = trimmedVarName.split('.').reduce((obj: any, key: string) => {
       if (obj === null || obj === undefined) return '';

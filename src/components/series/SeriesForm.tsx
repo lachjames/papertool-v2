@@ -140,7 +140,7 @@ const SeriesForm: React.FC<SeriesFormProps> = ({
     // Access state
     const [owners, setOwners] = useState<string[]>([]);
     const [editors, setEditors] = useState<string[]>([]);
-    const [accessLoading, setAccessLoading] = useState<boolean>(false);
+    const [, setAccessLoading] = useState<boolean>(false);
     const [accessError, setAccessError] = useState<string | null>(null);
     const [newOwnerEmail, setNewOwnerEmail] = useState('');
     const [newEditorEmail, setNewEditorEmail] = useState('');

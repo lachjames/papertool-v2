@@ -39,7 +39,7 @@ export async function fillPdfTemplate(
     const page = pdfDoc.getPage(0);
 
     // Set page dimensions
-    const { width, height } = page.getSize();
+    const { height } = page.getSize();
 
     // Embed fonts
     const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);

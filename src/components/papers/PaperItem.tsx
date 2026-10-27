@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Typography,
     Button,
@@ -7,17 +7,19 @@ import {
     CircularProgress,
     Link,
     Paper,
-    Stack,
-    Divider
+    Divider,
+    Tooltip
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import { PaperMetadata } from '../../types';
 import { useArchive } from '../../context/ArchiveContext';
 import getBaseURL from '../../getBaseURL';
+import { DECLARATION_FIELDS, describeDeclaration } from '../../utilities/declarations';
 
 interface PaperItemProps {
     paperId: string;
@@ -28,7 +30,9 @@ interface PaperItemProps {
 }
 
 const PaperItem: React.FC<PaperItemProps> = ({ paperId, metadata, onDelete, onEdit, seriesId }) => {
-    const { selectedArchiveId } = useArchive();
+    const { selectedArchiveId, archives } = useArchive();
+    const [copied, setCopied] = useState(false);
+
     // Loading state
     if (!metadata) {
         return (
@@ -140,6 +144,30 @@ const PaperItem: React.FC<PaperItemProps> = ({ paperId, metadata, onDelete, onEd
     const archiveHandle = selectedArchiveId || 'unknown';
     const pdfUrl = getBaseURL(`archives/${archiveHandle}/series/${seriesId}/papers/${paperId}/pdf`);
 
+    // Public (unauthenticated) S3 link, the same URL RePEc receives as File-URL. Built from
+    // the archive's configured base URL rather than a hard-coded bucket host.
+    const currentArchive = archives.find(a => a.id === selectedArchiveId);
+    const publicBase = (
+        currentArchive?.archiveUrl ||
+        (currentArchive?.baseUrl ? `${currentArchive.baseUrl.replace(/\/+$/, '')}/RePEc/${archiveHandle}/` : '')
+    ).trim();
+    const publicPdfUrl = publicBase
+        ? `${publicBase.replace(/\/+$/, '')}/${seriesId}/${paperId}.pdf`
+        : null;
+
+    const handleCopyPublicLink = async () => {
+        if (!publicPdfUrl) return;
+        try {
+            await navigator.clipboard.writeText(publicPdfUrl);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch (error) {
+            console.error('Clipboard write failed:', error);
+            // Fallback for browsers/contexts without clipboard access
+            window.prompt('Copy the public PDF link:', publicPdfUrl);
+        }
+    };
+
     const displayDateSource = metadata.publicationDate || metadata.createdAt || metadata.updatedAt;
     const displayDate = displayDateSource ? new Date(displayDateSource).toLocaleDateString() : '';
 
@@ -229,6 +257,18 @@ const PaperItem: React.FC<PaperItemProps> = ({ paperId, metadata, onDelete, onEd
                 )}
             </Box>
 
+            {/* Research integrity declarations (absent on historic papers => "Not provided") */}
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.25 }}>
+                    Declarations
+                </Typography>
+                {DECLARATION_FIELDS.map(field => (
+                    <Typography key={field.key} variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.75rem' }}>
+                        {field.label}: {describeDeclaration(metadata.declarations?.[field.key])}
+                    </Typography>
+                ))}
+            </Box>
+
             <Divider sx={{ mb: 2 }} />
 
             {/* Actions */}
@@ -243,6 +283,19 @@ const PaperItem: React.FC<PaperItemProps> = ({ paperId, metadata, onDelete, onEd
                             View PDF
                         </Button>
                     </Link>
+                )}
+                {metadata.hasPDF && publicPdfUrl && (
+                    <Tooltip title={publicPdfUrl}>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            color={copied ? 'success' : 'primary'}
+                            startIcon={<ContentCopyIcon />}
+                            onClick={handleCopyPublicLink}
+                        >
+                            {copied ? 'Copied!' : 'Copy public link'}
+                        </Button>
+                    </Tooltip>
                 )}
                 <Button
                     variant="outlined"

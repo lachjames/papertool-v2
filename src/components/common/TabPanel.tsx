@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box } from '@mui/material';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -8,12 +8,7 @@ interface TabPanelProps {
     elevation?: number;
 }
 
-const TabPanel: React.FC<TabPanelProps> = ({ 
-  children, 
-  value, 
-  index, 
-  elevation = 0 
-}) => {
+const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
     return (
         <div
             role="tabpanel"
@@ -22,7 +17,7 @@ const TabPanel: React.FC<TabPanelProps> = ({
             aria-labelledby={`tab-${index}`}
         >
             {value === index && (
-                <Box 
+                <Box
                   sx={{
                     height: 'calc(100vh - 180px)',
                     overflow: 'auto',

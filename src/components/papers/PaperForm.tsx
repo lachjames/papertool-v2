@@ -10,6 +10,10 @@ import {
     Input,
     InputLabel,
     FormControl,
+    FormControlLabel,
+    FormLabel,
+    Radio,
+    RadioGroup,
     CircularProgress,
     Tooltip,
     IconButton,
@@ -24,7 +28,7 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CloseIcon from '@mui/icons-material/Close';
-import { NewPaperData, PageSize, PaperMetadata, SeriesMetadata } from '../../types';
+import { DeclarationStatus, NewPaperData, PageSize, PaperDeclarations, PaperMetadata, SeriesMetadata } from '../../types';
 import axios from 'axios';
 import getBaseURL from '../../getBaseURL';
 import { detectPdfPageSize, getPageSizeName } from '../../utilities/detectPdfPageSize';
@@ -33,6 +37,12 @@ import {
     generateCoverPageFromSeriesTemplate,
     validateSeriesSettingsForCoverPage
 } from '../../utilities/seriesTemplateIntegration';
+import {
+    DECLARATION_FIELDS,
+    declarationsAnswered,
+    emptyDeclarations,
+    normalizeDeclarations
+} from '../../utilities/declarations';
 
 interface PaperFormProps {
     // For create mode
@@ -68,7 +78,8 @@ const PaperForm: React.FC<PaperFormProps> = ({
         link: '',
         abstract: '',
         keywords: '',
-        jel: ''
+        jel: '',
+        declarations: emptyDeclarations()
     });
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -163,7 +174,8 @@ const PaperForm: React.FC<PaperFormProps> = ({
                 jel: Array.isArray(initialData.jel)
                     ? initialData.jel.join(', ')
                     : '',
-                pageSize: migratedPageSize
+                pageSize: migratedPageSize,
+                declarations: normalizeDeclarations(initialData.declarations)
             });
 
             // Set detected page size from migrated data
@@ -207,6 +219,19 @@ const PaperForm: React.FC<PaperFormProps> = ({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setPaperData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const updateDeclaration = (key: keyof PaperDeclarations, patch: { status?: DeclarationStatus; details?: string }) => {
+        setPaperData(prev => {
+            const current = prev.declarations || emptyDeclarations();
+            return {
+                ...prev,
+                declarations: {
+                    ...current,
+                    [key]: { ...current[key], ...patch }
+                }
+            };
+        });
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -341,6 +366,12 @@ const PaperForm: React.FC<PaperFormProps> = ({
                 setAnalysisError('Please select a content PDF file');
                 return;
             }
+
+            // Required on create only, so fixes to historic papers are not blocked.
+            if (!declarationsAnswered(paperData.declarations)) {
+                setAnalysisError('Please answer the funding, conflicts of interest and ethics approval declarations');
+                return;
+            }
         }
 
         try {
@@ -412,7 +443,7 @@ const PaperForm: React.FC<PaperFormProps> = ({
 
             // Reset form if not in modal
             if (!inModal) {
-                setPaperData({ title: '', authors: '', publicationDate: '', paperNumber: '', link: '', abstract: '', keywords: '', jel: '' });
+                setPaperData({ title: '', authors: '', publicationDate: '', paperNumber: '', link: '', abstract: '', keywords: '', jel: '', declarations: emptyDeclarations() });
                 setSelectedFile(null);
                 setCoverPageFile(null);
                 setCoverPageDataSnapshot(null);
@@ -700,6 +731,52 @@ const PaperForm: React.FC<PaperFormProps> = ({
                         margin="normal"
                         helperText="Enter JEL codes separated by commas (e.g., C61, D81)"
                     />
+                </Grid>
+
+                <Grid item xs={12}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                        Research integrity declarations{editMode ? '' : ' (required)'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                        Required by the Faculty Research Integrity committee for all working papers. Stored with the paper and shown to series members; not published to RePEc.
+                    </Typography>
+                    {DECLARATION_FIELDS.map(field => {
+                        const current = paperData.declarations?.[field.key] || { status: 'not_provided' as DeclarationStatus };
+                        return (
+                            <Box key={field.key} sx={{ mb: 1.5 }}>
+                                <FormControl component="fieldset" size="small">
+                                    <FormLabel component="legend" sx={{ fontSize: '0.875rem' }}>
+                                        {field.question}
+                                    </FormLabel>
+                                    <RadioGroup
+                                        row
+                                        name={`declaration-${field.key}`}
+                                        value={current.status === 'not_provided' ? '' : current.status}
+                                        onChange={(e) => updateDeclaration(field.key, { status: e.target.value as DeclarationStatus })}
+                                    >
+                                        <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                                        <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                                    </RadioGroup>
+                                </FormControl>
+                                {current.status === 'yes' && (
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        label={field.detailsLabel}
+                                        value={current.details || ''}
+                                        onChange={(e) => updateDeclaration(field.key, { details: e.target.value })}
+                                        multiline
+                                        minRows={2}
+                                    />
+                                )}
+                                {editMode && current.status === 'not_provided' && (
+                                    <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>
+                                        Not provided yet
+                                    </Typography>
+                                )}
+                            </Box>
+                        );
+                    })}
                 </Grid>
 
                 <Grid item xs={12}>

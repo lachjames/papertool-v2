@@ -1,11 +1,9 @@
 import { PDFDocument } from 'pdf-lib';
-import { 
-    PageSize, 
-    CustomPageSize, 
+import {
+    PageSize,
+    CustomPageSize,
     StandardPageSize,
-    isStandardPageSize, 
-    STANDARD_PAGE_SIZES,
-    resolvePageSize 
+    resolvePageSize
 } from '../shared-pdf-types';
 
 /**

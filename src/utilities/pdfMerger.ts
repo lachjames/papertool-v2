@@ -58,7 +58,6 @@ export async function createCoverPagePdf(
         });
 
         // Convert comma-separated strings to arrays where needed
-        const authorArray = paperData.authors.split(',').map(author => author.trim()).filter(author => author);
         const keywordsArray = paperData.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
         const jelArray = paperData.jel?.split(',').map(j => j.trim()).filter(j => j.length > 0) ?? [];
 

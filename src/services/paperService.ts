@@ -110,7 +110,8 @@ export const createNewPaper = async (
     publicationDate: paperData.publicationDate ? paperData.publicationDate.trim() : undefined,
     paperNumber: paperData.paperNumber ? paperData.paperNumber.trim() : undefined,
     link: paperData.link ? paperData.link.trim() : undefined,
-    pageSize: paperData.pageSize || 'a4'
+    pageSize: paperData.pageSize || 'a4',
+    declarations: paperData.declarations
   };
 
   console.log('Sending paper metadata:', JSON.stringify(paperMetadata));
@@ -192,6 +193,10 @@ export const updateExistingPaper = async (
 
   if (paperData.link !== undefined) {
     paperMetadata.link = paperData.link ? paperData.link.trim() : '';
+  }
+
+  if (paperData.declarations !== undefined) {
+    paperMetadata.declarations = paperData.declarations;
   }
 
   if (Object.keys(paperMetadata).length > 0) {
